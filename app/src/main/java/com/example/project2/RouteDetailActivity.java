@@ -223,6 +223,7 @@ public class RouteDetailActivity extends AppCompatActivity {
      * @param route The route to display.
      */
     private void displayRouteDetails(Route route) {
+        Log.d(TAG, "IN METHOD displayRouteDetails()");
         // Set UI elements with route data
         routeTitle.setText(route.getTitle());
         location.setText(String.format("Location: %s", route.getCity()));

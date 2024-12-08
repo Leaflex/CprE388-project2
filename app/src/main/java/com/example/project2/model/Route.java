@@ -3,9 +3,12 @@ package com.example.project2.model;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
+import android.util.Log;
 
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -26,6 +29,10 @@ public class Route {
     public static final String FIELD_DIFFICULTY_ORDER = "difficultyOrder";
     public static final String FIELD_SLOPE_ORDER = "slopeOrder";
     public static final String FIELD_DESCRIPTION = "description"; // New constant
+
+    // Deserialize = "RGVzZXJpYWxpemUg"
+    // abcdefjhijk = "YWJjZGVmZ2hpamtsIO"
+    public static final String PREFIX = "YWJjZGVmZ2hpamtsIO";
 
     /**
      * Private variables for the Route object consisting of different fields to describe a route
@@ -125,7 +132,13 @@ public class Route {
      * @return A string that consists of a URL to a route's photo
      */
     public String getPhoto() {
-        return photo;
+        Log.d("Route", "IN METHOD getPhoto()");
+
+        String bitmapString = null;
+        if (photo.startsWith(PREFIX)) {
+            bitmapString = photo.substring(PREFIX.length());
+        }
+        return bitmapString;
     }
 
     /**
@@ -134,8 +147,23 @@ public class Route {
      * @return The photo as a decoded Bitmap.
      */
     public Bitmap getPhotoAsBitmap() {
-        byte[] decodedBytes = Base64.decode(photo, Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+        Log.d("getPhotoAsBitmap()", "IN getPhotoAsBitmap()");
+        Log.d("Route", photo.substring(0, 100));
+       try {
+           String bitmapString = null;
+           if (photo.startsWith(PREFIX)) {
+               bitmapString = photo.substring(PREFIX.length());
+           }
+           Log.d("Route", bitmapString.substring(0, 100));
+
+           byte[] noPrefixBytes = Base64.decode(bitmapString, Base64.DEFAULT);
+
+           return BitmapFactory.decodeByteArray(noPrefixBytes, 0, noPrefixBytes.length);
+
+       } catch (Exception e) {
+           Log.e("getPhotoAsBitmap Fail", e.toString());
+       }
+       return Bitmap.createBitmap(20, 20, Bitmap.Config.ARGB_8888);
     }
 
     /**
@@ -143,6 +171,8 @@ public class Route {
      * @param photo A string that consists of a URL to a route's photo
      */
     public void setPhoto(String photo) {
+        Log.d("Route", "IN METHOD setPhoto()");
+        Log.d("Route", photo.substring(0, 100));
         this.photo = photo;
     }
 

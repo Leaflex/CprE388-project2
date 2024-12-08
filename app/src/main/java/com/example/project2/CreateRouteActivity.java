@@ -33,6 +33,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Activity for allowing users to create a new route
@@ -260,8 +261,11 @@ public class CreateRouteActivity extends AppCompatActivity {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
         byte[] byteArray = byteArrayOutputStream.toByteArray();
+        // "abcdefghijkl " "Deserialize "
+        String utf8String = "abcdefghijkl " + new String(byteArray, StandardCharsets.UTF_8);
+        String base64String = Base64.encodeToString(utf8String.getBytes(StandardCharsets.UTF_8), Base64.URL_SAFE);
 
-        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+        return base64String;
     }
 
     /**
@@ -301,9 +305,23 @@ public class CreateRouteActivity extends AppCompatActivity {
         route.setAvgRating(0.0);
 
         String imageString = bitmapToString(routeImageBitmap);
-        Log.d(TAG, "imageString Length: " + imageString.length());
-        Log.d("imageString:", imageString);
+        Log.d(TAG, "photo with header: " + imageString.substring(0, 100));
+
         route.setPhoto(imageString);
+
+        // Add test to bitmap string to make firestore not serialize it incorrectly
+        //bitmapString = "Deserialize " + bitmapString;
+        //Log.d("bitmapString", "before encode bitmapString substring: " + bitmapString.substring(0, 300));
+
+        // Encode to base64 for firestore upload
+        //String imageString64 = Base64.encodeToString(bitmapString.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+        //Log.d("imageString64:", "Endcoded imageString64 substring: " + imageString64.substring(0, 300));
+        //route.setPhoto(imageString64);
+
+        //Decode to ensure it works
+        //byte[] decodedBytes = Base64.decode(imageString64, Base64.DEFAULT);
+        //String decodedString = new String(decodedBytes, StandardCharsets.UTF_8);
+        //Log.d("decodedString:", "decodedSting substring: " + decodedString.substring(0, 300));
 
         // Check the selected access type via the radio button checked by the user
         if (publicRadioButton.isChecked()) {
